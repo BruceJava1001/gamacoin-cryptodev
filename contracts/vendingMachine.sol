@@ -57,4 +57,41 @@ contract VendingMachine {
         address payable payTo = payable(msg.sender);
         payTo.transfer(amount * sellingprice);
     }
+
+    function withdrawEthers() public isAdmin returns (bool) {
+        address payable payTo = payable(msg.sender);
+        payTo.transfer(address(this).balance);
+        return (true);
+    }
+
+    function changeSellPrice(uint256 price) public isAdmin returns (uint256) {
+        require(price > 0, "The price can not be 0");
+        require(price != sellingprice, "The price has to be different");
+        require(
+            price <= buyingprice,
+            "The selling price can not be greater than the buying price"
+        );
+        sellingprice = price;
+        return (sellingprice);
+    }
+
+    function changeBuyPrice(uint256 price) public isAdmin returns (uint256) {
+        require(price > 0, "The price can not be 0");
+        require(price != buyingprice, "The price has to be different");
+        require(
+            price >= sellingprice,
+            "The buying price can not be less than the selling price"
+        );
+        buyingprice = price;
+        return (buyingprice);
+    }
+
+    function kill() public isAdmin {
+        GamaToken(tokenAddress).transferFrom(
+            address(this),
+            msg.sender,
+            GamaToken(tokenAddress).balanceOf(address(this))
+        );
+        selfdestruct(payable(msg.sender));
+    }
 }

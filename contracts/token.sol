@@ -112,6 +112,7 @@ contract GamaToken is IERC20 {
             amount <= addressToBalance[sender],
             "Insufficient Balance to Transfer"
         );
+        require(amount > 0, "Amount has to be greater than 0");
         require(
             address(recipient) != address(0),
             "Account address can not be 0"
@@ -187,7 +188,7 @@ contract GamaToken is IERC20 {
         return true;
     }
 
-    function activable() public isOwner returns (bool) {
+    function activate() public isOwner returns (bool) {
         require(contractState == Status.PAUSED, "Contract is already Active");
         contractState = Status.ACTIVE;
         return true;
