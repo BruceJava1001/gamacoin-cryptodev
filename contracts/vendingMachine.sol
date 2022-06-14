@@ -44,7 +44,7 @@ contract VendingMachine {
             "The trasaction value was lower than expected"
         );
         require(availableSupply() >= amount, "Not enough tokens in stock");
-        GamaToken(tokenAddress).transfer(address(this), msg.sender, amount);
+        GamaToken(tokenAddress).transferFrom(address(this), msg.sender, amount);
     }
 
     function sellTokens(uint256 amount) public {
@@ -53,7 +53,7 @@ contract VendingMachine {
             address(this).balance >= amount * sellingprice,
             "The machine does not have enough Ether"
         );
-        GamaToken(tokenAddress).transfer(msg.sender, address(this), amount);
+        GamaToken(tokenAddress).transferFrom(msg.sender, address(this), amount);
         address payable payTo = payable(msg.sender);
         payTo.transfer(amount * sellingprice);
     }

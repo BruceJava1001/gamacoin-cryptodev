@@ -9,7 +9,11 @@ interface IERC20 {
 
     function balanceOf(address account) external view returns (uint256);
 
-    function transfer(
+    function transfer(address recipient, uint256 amount)
+        external
+        returns (bool);
+
+    function transferFrom(
         address sender,
         address recipient,
         uint256 amount
@@ -47,6 +51,7 @@ contract GamaToken is IERC20 {
     Status contractState;
 
     mapping(address => uint256) private addressToBalance;
+    mapping(address => bool) private addressIsAllowed;
 
     // Events
     // event Transfer(address sender, address receiver, uint256 amount);
@@ -54,6 +59,11 @@ contract GamaToken is IERC20 {
     // Modifiers
     modifier isOwner() {
         require(msg.sender == owner, "Must be the owner");
+        _;
+    }
+
+    modifier isAllowed() {
+        require(addressIsAllowed[msg.sender], "Must be the allowed");
         _;
     }
 
@@ -93,24 +103,47 @@ contract GamaToken is IERC20 {
         return addressToBalance[tokenOwner];
     }
 
-    function transfer(
+    function _transfer(
         address sender,
-        address receiver,
-        uint256 quantity
-    ) public override isActive returns (bool) {
+        address recipient,
+        uint256 amount
+    ) private isActive returns (bool) {
         require(
-            quantity <= addressToBalance[sender],
+            amount <= addressToBalance[sender],
             "Insufficient Balance to Transfer"
         );
         require(
-            address(receiver) != address(0),
+            address(recipient) != address(0),
             "Account address can not be 0"
         );
-        addressToBalance[sender] = addressToBalance[sender] - quantity;
-        addressToBalance[receiver] = addressToBalance[receiver] + quantity;
+        addressToBalance[sender] = addressToBalance[sender] - amount;
+        addressToBalance[recipient] = addressToBalance[recipient] + amount;
 
-        emit Transfer(sender, receiver, quantity);
+        emit Transfer(sender, recipient, amount);
         return true;
+    }
+
+    function transfer(address recipient, uint256 amount)
+        public
+        override
+        returns (bool)
+    {
+        _transfer(msg.sender, recipient, amount);
+        return (true);
+    }
+
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) public override isAllowed returns (bool) {
+        _transfer(sender, recipient, amount);
+        return (true);
+    }
+
+    function allowAddress(address account) public isOwner returns (bool) {
+        addressIsAllowed[account] = true;
+        return (true);
     }
 
     function mint(address account, uint256 amount)
@@ -143,7 +176,7 @@ contract GamaToken is IERC20 {
         );
         addressToBalance[account] -= amount;
         totalsupply -= amount;
-        emit Transfer(address(0), account, amount);
+        emit Transfer(account, address(0), amount);
 
         return true;
     }
