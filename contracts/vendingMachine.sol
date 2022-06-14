@@ -86,12 +86,23 @@ contract VendingMachine {
         return (buyingprice);
     }
 
+    function loadTokens(uint256 amount) public isAdmin returns (bool) {
+        require(amount > 0, "Amount has to be greater than 0");
+        GamaToken(tokenAddress).transferFrom(msg.sender, address(this), amount);
+        return (true);
+    }
+
+    function loadEthers() public payable isAdmin returns (bool) {
+        require(msg.value > 0, "Amount has to be greater than 0");
+        return (true);
+    }
+
     function kill() public isAdmin {
         GamaToken(tokenAddress).transferFrom(
             address(this),
-            msg.sender,
+            admin,
             GamaToken(tokenAddress).balanceOf(address(this))
         );
-        selfdestruct(payable(msg.sender));
+        selfdestruct(payable(admin));
     }
 }
