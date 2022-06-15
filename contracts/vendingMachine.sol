@@ -59,6 +59,7 @@ contract VendingMachine {
     }
 
     function withdrawEthers() public isAdmin returns (bool) {
+        require(address(this).balance > 0,"The machine current balance is 0");
         address payable payTo = payable(msg.sender);
         payTo.transfer(address(this).balance);
         return (true);
