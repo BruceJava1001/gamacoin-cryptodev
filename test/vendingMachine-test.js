@@ -1,3 +1,5 @@
+const { expect } = require('chai');
+
 require("@nomiclabs/hardhat-web3");
 describe('Initializing', () => {
     //checar se carregou os valores corretos
