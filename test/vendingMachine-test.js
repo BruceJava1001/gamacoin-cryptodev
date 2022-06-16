@@ -1,7 +1,8 @@
 const { expect } = require('chai');
-
+const { waffle } = require('hardhat');
 require("@nomiclabs/hardhat-web3");
 describe('Initializing', () => {
+    
     //checar se carregou os valores corretos
     //espera que retorne to total supply
     //espera que retorne o buyingPrice
@@ -38,8 +39,9 @@ describe('BuyTokens', () => {
     let gamaToken
     let VendingMachine
     let vendingMachine
+    const provider = waffle.provider;
     beforeEach(async function () {
-        const [admin, wallets] = await ethers.getSigners();
+        [admin, ...wallets] = await ethers.getSigners();
         GamaToken = await ethers.getContractFactory('GamaToken');
         gamaToken = await GamaToken.deploy(1000);
         gamaToken.deployed();
@@ -50,8 +52,25 @@ describe('BuyTokens', () => {
     })
     it('should revert if the amount is zero', async () => {
         // console.log(await vendingMachine.buyTokens(0))
-        expect(await vendingMachine.buyTokens(0)).to.be.revertedWith('Amount has to be greater than 0');
+        await expect(vendingMachine.buyTokens(0)).to.be.revertedWith('Amount has to be greater than 0');
     })
+    it('should revert if the transaction value is lower than the expected', async () => {
+        await expect(vendingMachine.buyTokens(1, { value: web3.utils.toWei('1', 'ether') })).to.be.revertedWith('The trasaction value was lower than expected');
+    })
+    it('should revert if the availabeSupply is less than the amount', async () => {
+        await expect(vendingMachine.buyTokens(1, { value: web3.utils.toWei('2', 'ether')} )).to.be.revertedWith('Not enough tokens in stock');
+    })
+    // it('should be able to buy tokens', async () => {
+    //  // console.log(admin)
+    //  expect(await gamaToken.balanceOf(admin.address)).to.be.equal(1000);
+    //  await vendingMachine.loadTokens(100)
+    //  expect(await gamaToken.balanceOf(admin.address)).to.be.equal(900);
+    //  expect(await provider.getBalance(wallets[0].address)).to.be.equal(web3.utils.toWei('10000', 'ether').toString())
+    //  await vendingMachine.connect(wallets[0]).buyTokens(1, { gasPrice: 0, value: web3.utils.toWei('2', 'ether')} )
+    //  // await vendingMachine.connect(wallets[0]).buyTokens(1, { baseFeePerGas: 0, gasPrice: 0, value: web3.utils.toWei('2', 'ether')} )
+    //  expect(await gamaToken.balanceOf(wallets[0].address)).to.be.equal(1);
+    //  expect(await provider.getBalance(wallets[0].address)).to.be.equal(web3.utils.toWei('9998', 'ether').toString())
+    // })
 })
 //deve retornar erro caso o amount seja menor que zero
 //deve retornar erro caso o balanço seja menor do que o esperado
@@ -78,15 +97,3 @@ describe('BuyTokens', () => {
 //apenas o admin pode utilizar
 //transferir o saldo total de tokens e ethers do contrato para o admin
 //checar se o contrato morreu
-
-
-
-
-
-
-
-
-
-
-
-
