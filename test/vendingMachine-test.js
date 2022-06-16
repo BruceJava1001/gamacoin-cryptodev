@@ -51,7 +51,6 @@ describe('BuyTokens', () => {
         await gamaToken.allowAddress(vendingMachine.address)
     })
     it('should revert if the amount is zero', async() => {
-        // console.log(await vendingMachine.buyTokens(0))
         await expect(vendingMachine.buyTokens(0)).to.be.revertedWith('Amount has to be greater than 0');
     })
     it('should revert if the transaction value is lower than the expected', async() => {
@@ -97,7 +96,6 @@ describe('SellTokens', () => {
         await gamaToken.allowAddress(vendingMachine.address)
     })
     it('should revert if the amount is zero', async() => {
-        // console.log(await vendingMachine.buyTokens(0))
         await expect(vendingMachine.sellTokens(0)).to.be.revertedWith('Amount has to be greater than 0');
     })
     it('should revert if the transaction value is lower than the expected', async() => {
@@ -107,16 +105,48 @@ describe('SellTokens', () => {
 
 })
 
+describe('withdrawEthers', () => {
+
+    //apenas o admin pode utilizar
+    //deve retornar erro caso o balanço de ethers seja zero
+    //deve transferir os ethers e aumenta o saldo de ethers
+
+    let admin
+    let wallets
+    let GamaToken
+    let gamaToken
+    let VendingMachine
+    let vendingMachine
+    const provider = waffle.provider;
+    beforeEach(async function() {
+        [admin, ...wallets] = await ethers.getSigners();
+        GamaToken = await ethers.getContractFactory('GamaToken');
+        gamaToken = await GamaToken.deploy(1000);
+        gamaToken.deployed();
+        VendingMachine = await ethers.getContractFactory('VendingMachine');
+        vendingMachine = await VendingMachine.deploy(gamaToken.address);
+        vendingMachine.deployed();
+        await gamaToken.allowAddress(vendingMachine.address)
+    })
+
+    it('should revert if not admin', async() => {
+        await expect(vendingMachine.connect(wallets[1]).withdrawEthers()).to.be.revertedWith("Must be the admin");
+    })
+
+    it('should revert if the machine current balance is 0', async() => {
+            await expect(vendingMachine.withdrawEthers()).to.be.revertedWith("The machine current balance is 0");
+        })
+        /*  it('should revert if the transaction value is lower than the expected', async() => {
+             await expect(vendingMachine.sellTokens(1)).to.be.revertedWith('The machine does not have enough Ether');
+         }) */
 
 
-//deve retornar erro caso o amount seja menor que zero
-//deve retornar erro caso o balanço seja menor do que o esperado
-//deve transferir os token e aumenta o saldo de ethers
-//
-//apenas o admin pode utilizar
-//deve retornar erro caso o balanço de ethers seja zero
-//deve transferir os ethers e aumenta o saldo de ethers
-//
+})
+
+
+
+
+
 //apenas o admin pode utilizar
 //deve retornar erro caso o price seja zero
 //deve retornar erro caso o price seja igual ao price atual
