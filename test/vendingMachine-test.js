@@ -229,6 +229,52 @@ describe('changeSellPrice', () => {
 
 })
 
+describe('changeBuyPrice', () => {
+    //apenas o admin pode utilizar
+    //deve retornar erro caso o price seja zero
+    //deve retornar erro caso o price seja igual ao price atual
+    //deve retornar erro caso o pŕice seja menor que o buyingprice
+    //deve alterar o preço
+    let admin
+    let wallets
+    let GamaToken
+    let gamaToken
+    let VendingMachine
+    let vendingMachine
+    const provider = waffle.provider;
+    beforeEach(async function() {
+        [admin, ...wallets] = await ethers.getSigners();
+        GamaToken = await ethers.getContractFactory('GamaToken');
+        gamaToken = await GamaToken.deploy(1000);
+        gamaToken.deployed();
+        VendingMachine = await ethers.getContractFactory('VendingMachine');
+        vendingMachine = await VendingMachine.deploy(gamaToken.address);
+        vendingMachine.deployed();
+        await gamaToken.allowAddress(vendingMachine.address)
+    })
+    it('should revert if not admin', async() => {
+        await expect(vendingMachine.connect(wallets[1]).changeBuyPrice(5)).to.be.revertedWith("Must be the admin");
+    })
+
+    it('should revert if the amount is zero', async() => {
+        await expect(vendingMachine.changeBuyPrice(0)).to.be.revertedWith('The price can not be 0');
+    })
+
+    it('should revert if the amount is equal current price', async() => {
+        await expect(vendingMachine.changeBuyPrice(web3.utils.toWei('2', 'ether'))).to.be.revertedWith('The price has to be different');
+    })
+
+    it('should revert if the amount is less than the selling price', async() => {
+        await expect(vendingMachine.changeBuyPrice(web3.utils.toWei('0.5', 'ether'))).to.be.revertedWith('The buying price can not be less than the selling price');
+    })
+
+    it('should change price', async() => {
+        expect(await vendingMachine.buyingPrice()).to.be.equal(web3.utils.toWei('2', 'ether'));
+        await vendingMachine.changeBuyPrice(web3.utils.toWei('3', 'ether'));
+        expect(await vendingMachine.buyingPrice()).to.be.equal(web3.utils.toWei('3', 'ether'));
+    })
+
+})
 
 
 
