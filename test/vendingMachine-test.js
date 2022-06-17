@@ -177,14 +177,54 @@ describe('withdrawEthers', () => {
         let etherBalance = (Number(adminBalanceAfter) - Number(adminBalanceBefore))
         let gas = Number(valueToTransfer) - etherBalance
         expect(etherBalance + gas).to.be.equal(Number(valueToTransfer))
+    })
 
+})
 
+describe('changeSellPrice', () => {
+    //apenas o admin pode utilizar
+    //deve retornar erro caso o price seja zero
+    //deve retornar erro caso o price seja igual ao price atual
+    //deve retornar erro caso o price seja maior que o buyingprice
+    //deve alterar o preço
 
+    let admin
+    let wallets
+    let GamaToken
+    let gamaToken
+    let VendingMachine
+    let vendingMachine
+    const provider = waffle.provider;
+    beforeEach(async function() {
+        [admin, ...wallets] = await ethers.getSigners();
+        GamaToken = await ethers.getContractFactory('GamaToken');
+        gamaToken = await GamaToken.deploy(1000);
+        gamaToken.deployed();
+        VendingMachine = await ethers.getContractFactory('VendingMachine');
+        vendingMachine = await VendingMachine.deploy(gamaToken.address);
+        vendingMachine.deployed();
+        await gamaToken.allowAddress(vendingMachine.address)
+    })
+    it('should revert if not admin', async() => {
+        await expect(vendingMachine.connect(wallets[1]).changeSellPrice(5)).to.be.revertedWith("Must be the admin");
+    })
 
+    it('should revert if the amount is zero', async() => {
+        await expect(vendingMachine.changeSellPrice(0)).to.be.revertedWith('The price can not be 0');
+    })
 
+    it('should revert if the amount is equal current price', async() => {
+        await expect(vendingMachine.changeSellPrice(web3.utils.toWei('1', 'ether'))).to.be.revertedWith('The price has to be different');
+    })
 
+    it('should revert if the amount is greater than the buying price', async() => {
+        await expect(vendingMachine.changeSellPrice(web3.utils.toWei('3', 'ether'))).to.be.revertedWith('The selling price can not be greater than the buying price');
+    })
 
-
+    it('should change price', async() => {
+        expect(await vendingMachine.sellingPrice()).to.be.equal(web3.utils.toWei('1', 'ether'));
+        await vendingMachine.changeSellPrice(web3.utils.toWei('2', 'ether'));
+        expect(await vendingMachine.sellingPrice()).to.be.equal(web3.utils.toWei('2', 'ether'));
     })
 
 })
@@ -193,12 +233,8 @@ describe('withdrawEthers', () => {
 
 
 
-//apenas o admin pode utilizar
-//deve retornar erro caso o price seja zero
-//deve retornar erro caso o price seja igual ao price atual
-//deve retornar erro caso o pŕice seja maior que o buyingprice
-//deve alterar o preço
-//
+
+
 //apenas o admin pode utilizar
 //deve retornar erro caso o price seja zero
 //deve retornar erro caso o price seja igual ao price atual
