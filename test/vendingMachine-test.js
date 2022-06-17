@@ -274,23 +274,45 @@ describe('changeBuyPrice', () => {
         expect(await vendingMachine.buyingPrice()).to.be.equal(web3.utils.toWei('3', 'ether'));
     })
 
+    describe('loadTokens', () => {
+        //apenas o admin pode utilizar
+        //deve retornar erro caso o amount seja zero
+        //deve transferir o amount da carteira do admin para o contrato
+        let admin
+        let wallets
+        let GamaToken
+        let gamaToken
+        let VendingMachine
+        let vendingMachine
+        const provider = waffle.provider;
+        beforeEach(async function () {
+            [admin, ...wallets] = await ethers.getSigners();
+            GamaToken = await ethers.getContractFactory('GamaToken');
+            gamaToken = await GamaToken.deploy(1000);
+            gamaToken.deployed();
+            VendingMachine = await ethers.getContractFactory('VendingMachine');
+            vendingMachine = await VendingMachine.deploy(gamaToken.address);
+            vendingMachine.deployed();
+            await gamaToken.allowAddress(vendingMachine.address)
+        })
+        it('should revert if not admin', async () => {
+            await expect(vendingMachine.connect(wallets[1]).loadTokens(5)).to.be.revertedWith("Must be the admin");
+        })
+        it('should revert if the amount is zero', async () => {
+            await expect(vendingMachine.loadTokens(0)).to.be.revertedWith('Amount has to be greater than 0');
+        })
+        it('should load tokens', async () => {
+            expect(await gamaToken.balanceOf(admin.address)).to.be.equal(1000);
+            expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(0);
+            await vendingMachine.loadTokens(100)
+            expect(await gamaToken.balanceOf(admin.address)).to.be.equal(900);
+            expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(100);
+        })
+    })
+
 })
 
 
-
-
-
-
-//apenas o admin pode utilizar
-//deve retornar erro caso o price seja zero
-//deve retornar erro caso o price seja igual ao price atual
-//deve retornar erro caso o pŕice seja menor que o buyingprice
-//deve alterar o preço
-//
-//apenas o admin pode utilizar
-//deve retornar erro caso o amount seja zero
-//deve transferir o amount da carteira do admin para o contrato
-//
 //apenas o admin pode utilizar
 //deve retornar erro caso o value seja zero
 //deve transferir o valor de ethers da carteira do admin para o contrato
