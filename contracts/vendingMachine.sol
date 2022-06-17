@@ -94,7 +94,7 @@ contract VendingMachine {
     }
 
     function loadEthers() public payable isAdmin returns (bool) {
-        require(msg.value > 0, "Amount has to be greater than 0");
+        require(msg.value > 0, "Value has to be greater than 0");
         return (true);
     }
 
