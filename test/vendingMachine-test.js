@@ -64,14 +64,11 @@ describe('BuyTokens', () => {
 		await vendingMachine.loadTokens(100)
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(900);
 		expect(await provider.getBalance(wallets[0].address)).to.be.equal(web3.utils.toWei('10000', 'ether').toString())
-		const walletBalanceBefore = await provider.getBalance(wallets[0].address);
+
 		const valueToTransfer = web3.utils.toWei('2', 'ether');
-		await vendingMachine.connect(wallets[0]).buyTokens(1, { value: valueToTransfer })
+		expect(await vendingMachine.connect(wallets[0]).buyTokens(1, { value: valueToTransfer })).to.changeEtherBalances([vendingMachine, wallets[0]], [valueToTransfer, -valueToTransfer])
 		expect(await gamaToken.balanceOf(wallets[0].address)).to.be.equal(1);
-		const walletBalanceAfter = await provider.getBalance(wallets[0].address);
-		const etherBalance = (Number(walletBalanceBefore) - Number(walletBalanceAfter))
-		const gas = etherBalance - Number(valueToTransfer)
-		expect(etherBalance - gas).to.be.equal(Number(valueToTransfer))
+		expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(99);
 	})
 })
 
@@ -109,19 +106,16 @@ describe('SellTokens', () => {
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(1000);
 		await vendingMachine.loadTokens(100)
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(900);
+		expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(100);
 		expect(await provider.getBalance(wallets[1].address)).to.be.equal(web3.utils.toWei('10000', 'ether').toString())
 		let valueToTransfer = web3.utils.toWei('2', 'ether');
 		await vendingMachine.connect(wallets[1]).buyTokens(1, { value: valueToTransfer })
 		expect(await gamaToken.balanceOf(wallets[1].address)).to.be.equal(1);
 
-		let walletBalanceBefore = await provider.getBalance(wallets[1].address);
 		valueToTransfer = web3.utils.toWei('1', 'ether');
-		await vendingMachine.connect(wallets[1]).sellTokens(1)
+		expect(await vendingMachine.connect(wallets[1]).sellTokens(1)).to.changeEtherBalances([vendingMachine, wallets[1], [-valueToTransfer, valueToTransfer]])
 		expect(await gamaToken.balanceOf(wallets[1].address)).to.be.equal(0);
-		let walletBalanceAfter = await provider.getBalance(wallets[1].address);
-		let etherBalance = (Number(walletBalanceAfter) - Number(walletBalanceBefore))
-		let gas = Number(valueToTransfer) - etherBalance
-		expect(etherBalance + gas).to.be.equal(Number(valueToTransfer))
+		expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(100);
 	})
 
 })
@@ -167,16 +161,8 @@ describe('withdrawEthers', () => {
 		await vendingMachine.connect(wallets[2]).buyTokens(1, { value: valueToTransfer })
 		expect(await gamaToken.balanceOf(wallets[2].address)).to.be.equal(1);
 
-
-		let adminBalanceBefore = await provider.getBalance(admin.address);
-		await vendingMachine.withdrawEthers()
-		let walletBalanceAfter = await provider.getBalance(vendingMachine.address);
-		expect(walletBalanceAfter).to.be.equal(0)
-
-		let adminBalanceAfter = await provider.getBalance(admin.address);
-		let etherBalance = (Number(adminBalanceAfter) - Number(adminBalanceBefore))
-		let gas = Number(valueToTransfer) - etherBalance
-		expect(etherBalance + gas).to.be.equal(Number(valueToTransfer))
+		expect(await vendingMachine.withdrawEthers()).to.changeEtherBalances([admin, vendingMachine], [valueToTransfer, -valueToTransfer])
+		expect(await provider.getBalance(vendingMachine.address)).to.be.equal(0)
 	})
 
 })
@@ -356,10 +342,7 @@ describe('loadEthers', () => {
 })
 
 
-//apenas o admin pode utilizar
-//deve retornar erro caso o value seja zero
-//deve transferir o valor de ethers da carteira do admin para o contrato
-//
+
 //apenas o admin pode utilizar
 //transferir o saldo total de tokens e ethers do contrato para o admin
 //checar se o contrato morreu
