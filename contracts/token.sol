@@ -23,16 +23,9 @@ interface IERC20 {
 
     function burn(address account, uint256 amount) external returns (bool);
 
-    //Não implementados (ainda)
-    //function allowence(address owner, address spender) external view returns(uint256);
-    //function approve(address spender, uint256 amount) external returns(bool);
-    //function transferFrom(address sender, address recipient, uint256 amount) external returns(bool);
-
     //Implementado
     event Transfer(address from, address to, uint256 value);
 
-    //Não está implementado (ainda)
-    //event Approval(address owner, address spender, uint256 value);
 }
 
 contract GamaToken is IERC20 {
@@ -46,15 +39,13 @@ contract GamaToken is IERC20 {
     address private owner;
     string public constant name = "GamaCoin";
     string public constant symbol = "GAMA";
-    uint8 public constant decimals = 3; //Default dos exemplos é sempre 18
+    uint8 public constant decimals = 18;
     uint256 private totalsupply;
     Status contractState;
 
     mapping(address => uint256) private addressToBalance;
     mapping(address => bool) private addressIsAllowed;
 
-    // Events
-    // event Transfer(address sender, address receiver, uint256 amount);
 
     // Modifiers
     modifier isOwner() {
@@ -108,14 +99,18 @@ contract GamaToken is IERC20 {
         address recipient,
         uint256 amount
     ) private isActive returns (bool) {
-        require(
-            amount <= addressToBalance[sender],
-            "Insufficient Balance to Transfer"
+		require(
+            address(sender) != address(0),
+            "Account address can not be 0"
         );
-        require(amount > 0, "Amount has to be greater than 0");
         require(
             address(recipient) != address(0),
             "Account address can not be 0"
+        );
+        require(amount > 0, "Amount has to be greater than 0");
+        require(
+            amount <= addressToBalance[sender],
+            "Insufficient Balance to Transfer"
         );
         addressToBalance[sender] = addressToBalance[sender] - amount;
         addressToBalance[recipient] = addressToBalance[recipient] + amount;
@@ -195,6 +190,7 @@ contract GamaToken is IERC20 {
     }
 
     function kill() public isOwner {
+		require(contractState == Status.PAUSED, "Contract needs to be Paused");
         selfdestruct(payable(owner));
     }
 }
