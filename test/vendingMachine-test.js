@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const { waffle } = require('hardhat');
+const { BigNumber } = require('ethers')
 require("@nomiclabs/hardhat-web3");
 describe('Initializing', () => {
 
@@ -22,7 +23,7 @@ describe('Initializing', () => {
 		vendingMachine = await VendingMachine.deploy(gamaToken.address);
 		vendingMachine.deployed();
 	})
-	it('should return the values passed on constructor', async () => {
+	it('should return the values passed on the constructor', async () => {
 		expect(await vendingMachine.buyingPrice()).to.be.equal(web3.utils.toWei('2', 'ether'));
 		expect(await vendingMachine.sellingPrice()).to.be.equal(web3.utils.toWei('1', 'ether'));
 		expect(await vendingMachine.availableSupply()).to.be.equal(0);
@@ -63,10 +64,10 @@ describe('BuyTokens', () => {
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(1000);
 		await vendingMachine.loadTokens(100)
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(900);
-		expect(await provider.getBalance(wallets[0].address)).to.be.equal(web3.utils.toWei('10000', 'ether').toString())
 
-		const valueToTransfer = web3.utils.toWei('2', 'ether');
-		expect(await vendingMachine.connect(wallets[0]).buyTokens(1, { value: valueToTransfer })).to.changeEtherBalances([vendingMachine, wallets[0]], [valueToTransfer, -valueToTransfer])
+		const valueToTransfer = BigNumber.from(web3.utils.toWei('2', 'ether'));
+		const valueToTransfer2 = BigNumber.from((web3.utils.toWei('-2', 'ether')));
+		await expect(await vendingMachine.connect(wallets[0]).buyTokens(1, { value: valueToTransfer })).to.changeEtherBalances([vendingMachine, wallets[0]], [valueToTransfer, valueToTransfer2])
 		expect(await gamaToken.balanceOf(wallets[0].address)).to.be.equal(1);
 		expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(99);
 	})
@@ -107,13 +108,13 @@ describe('SellTokens', () => {
 		await vendingMachine.loadTokens(100)
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(900);
 		expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(100);
-		expect(await provider.getBalance(wallets[1].address)).to.be.equal(web3.utils.toWei('10000', 'ether').toString())
 		let valueToTransfer = web3.utils.toWei('2', 'ether');
 		await vendingMachine.connect(wallets[1]).buyTokens(1, { value: valueToTransfer })
 		expect(await gamaToken.balanceOf(wallets[1].address)).to.be.equal(1);
 
-		valueToTransfer = web3.utils.toWei('1', 'ether');
-		expect(await vendingMachine.connect(wallets[1]).sellTokens(1)).to.changeEtherBalances([vendingMachine, wallets[1], [-valueToTransfer, valueToTransfer]])
+		valueToTransfer = web3.utils.toWei('-1', 'ether');
+		const valueToTransfer2 = web3.utils.toWei('1', 'ether');
+		await expect(await vendingMachine.connect(wallets[1]).sellTokens(1)).to.changeEtherBalances([vendingMachine, wallets[1]], [valueToTransfer, valueToTransfer2])
 		expect(await gamaToken.balanceOf(wallets[1].address)).to.be.equal(0);
 		expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(100);
 	})
@@ -156,12 +157,12 @@ describe('withdrawEthers', () => {
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(1000);
 		await vendingMachine.loadTokens(100)
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(900);
-		expect(await provider.getBalance(wallets[2].address)).to.be.equal(web3.utils.toWei('10000', 'ether').toString())
-		let valueToTransfer = web3.utils.toWei('2', 'ether');
+		const valueToTransfer = web3.utils.toWei('2', 'ether');
 		await vendingMachine.connect(wallets[2]).buyTokens(1, { value: valueToTransfer })
 		expect(await gamaToken.balanceOf(wallets[2].address)).to.be.equal(1);
-
-		expect(await vendingMachine.withdrawEthers()).to.changeEtherBalances([admin, vendingMachine], [valueToTransfer, -valueToTransfer])
+		
+		const valueToTransfer2 = web3.utils.toWei('-2', 'ether');
+		await expect(await vendingMachine.withdrawEthers()).to.changeEtherBalances([admin, vendingMachine], [valueToTransfer, valueToTransfer2])
 		expect(await provider.getBalance(vendingMachine.address)).to.be.equal(0)
 	})
 
@@ -333,16 +334,50 @@ describe('loadEthers', () => {
 	})
 
 	it('should load Ethers', async () => {
-		expect(await provider.getBalance(vendingMachine.address)).to.be.equal(0)
-		adminBalance = await provider.getBalance(admin.address)
-		valueToTransfer = web3.utils.toWei('100', 'ether');
-		expect(await vendingMachine.loadEthers({ value: valueToTransfer })).to.changeEtherBalance(admin, valueToTransfer)
-		expect(await provider.getBalance(vendingMachine.address)).to.be.equal(valueToTransfer)
+		valueToTransfer = web3.utils.toWei('1000', 'wei');
+		await expect(await vendingMachine.loadEthers({ value: valueToTransfer })).to.changeEtherBalances([admin, vendingMachine], [-valueToTransfer, valueToTransfer])
 	})
 })
 
+describe('kill', () => {
+	//apenas o admin pode utilizar
+	//transferir o saldo total de tokens e ethers do contrato para o admin
+	//checar se o contrato morreu
+	let admin
+	let wallets
+	let GamaToken
+	let gamaToken
+	let VendingMachine
+	let vendingMachine
+	const provider = waffle.provider;
+	beforeEach(async function () {
+		[admin, ...wallets] = await ethers.getSigners();
+		GamaToken = await ethers.getContractFactory('GamaToken');
+		gamaToken = await GamaToken.deploy(1000);
+		gamaToken.deployed();
+		VendingMachine = await ethers.getContractFactory('VendingMachine');
+		vendingMachine = await VendingMachine.deploy(gamaToken.address);
+		vendingMachine.deployed();
+		await gamaToken.allowAddress(vendingMachine.address)
+	})
 
+	it('should revert if not admin', async () => {
+		await expect(vendingMachine.connect(wallets[1]).kill()).to.be.revertedWith("Must be the admin");
+	})
 
-//apenas o admin pode utilizar
-//transferir o saldo total de tokens e ethers do contrato para o admin
-//checar se o contrato morreu
+	it('should transfer ether and tokens to admin and kill the contract', async () => {
+		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(1000);
+		expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(0);
+		await vendingMachine.loadTokens(100)
+		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(900);
+		expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(100);
+
+		valueToTransfer = web3.utils.toWei('1000', 'wei');
+		await expect(await vendingMachine.loadEthers({ value: valueToTransfer })).to.changeEtherBalances([admin, vendingMachine], [-valueToTransfer, valueToTransfer])
+
+		await expect(await vendingMachine.kill()).to.changeEtherBalances([admin, vendingMachine], [valueToTransfer, -valueToTransfer])
+		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(1000);
+		expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(0);
+		await expect(vendingMachine.buyingPrice()).to.be.revertedWith(0);
+	})
+})
