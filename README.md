@@ -1,4 +1,9 @@
-# Introdução
+<p align="center">
+  <img src="https://media1.giphy.com/media/U7y1PUFXsAUyZKcOOF/giphy.gif?cid=790b76110c564ff1801ef66472104247378bfb26df5980c4&rid=giphy.gif" alt="gif bitcoin"/>
+</p>
+
+# 🔭 Introdução 
+
 
 Esse projeto foi desenvolvido como parte do programa de formação CriptoDev da Gama Academy em parceria com a Blockchain Academy (uma empresa 2TM).
 
@@ -6,7 +11,7 @@ Ele formado por dois `Smart Contracts`, um para criação de um Token baseado n
 
 Em ambos foi utilizado `Solidity` e disponibilizados na rede de `Rede de Teste Ropsten da Ethereum`.
 
-# Integrantes do time
+# 👨‍💻 Integrantes do time 
 
 [Anderson Carneiro Sousa](https://github.com/a-cs)
 
@@ -15,11 +20,10 @@ Em ambos foi utilizado `Solidity` e disponibilizados na rede de `Rede de Teste 
 [Felipe Geazi](https://github.com/FelipeGeazi)
 
 
-# Apresentação
-Link para a [Apresentação](https://docs.google.com/presentation/d/11QQca9wtbKaJ8p2oCyScnEl4yXuibiszd4wjzGiQfBA/edit?usp=sharing)
 
 
-# Tecnologia utilizadas
+
+# ⚙️ Tecnologia utilizadas
 
 [![solidity](imgs/solidity.png)](https://docs.soliditylang.org/en/v0.8.15/)
 [![hardhat](imgs/hardhat.png)](https://hardhat.org/)
@@ -30,7 +34,7 @@ Link para a [Apresentação](https://docs.google.com/presentation/d/11QQca9wtbKa
 [![waffle](imgs/waffle.png)](https://getwaffle.io/)
 [![remix ide](imgs/remix.png)](https://remix-project.org/)
 
-# Instalação e operação
+# 🛠️ Instalação e operação
 
 Clone o repositório do projeto:
 
@@ -64,36 +68,41 @@ Para rodar os testes:
 npx hardhat test
 ```
 
-# Funções implementadas:
+# 💻 Funções implementadas:
 
-## Token
+## 🪙 Token
 
-1. balanceOf
-2. totalSupply
-3. transfer
-4. transferFrom
-5. mint
-6. burn
-7. pausable
-8. activate
-9. kill
+1. **balanceOf :** Consulta o saldo da carteira. 
+2. **totalSupply:**  Verifica a quantidade máxima de tokens disponíveis. 
+3. **transfer :** Recebe um valor de amount e um endereço de carteira.E realiza a transferencia de tokens,  no valor do amount para o endereço da carteira  indicado. 
+4. **transferFrom:** Recebe dois endereços de carteira e  realiza a transferencia de tokens, da carteira sender para carteira recepient.(Função liberada apenas para o endereço permitido. Ex: o contrato da vending machine)
+
+	 👑 **Funções exercida apenas pelo owner do contrato.**
+
+5. **mint:** Recebe um endereço de carteira e amount, criando tokens no valor de amount no endereço indicado. Além de  aumentar o total supply.
+6. **burn:** Recebe um endereço de carteira e amount, destruindo tokens no valor de amount no endereço indicado. Além de  diminuir o total supply.
+7. **pausable:** Pausa o contrato. 
+8. **activate:** Ativa o contrato
+9.  **kill:** Mata o contrato (Função apenas pode ser executada quando o contrato estiver pausado. )
 ___
-## Vending Machine
+## 🏪 Vending Machine
 
-1. availableSupply
-2. withdrawEthers
-3. buyingPrice
-4. changeSellPrice
-5. sellingPrice
-6. changeBuyPrice
-7. buyTokens
-8. loadTokens
-9. sellTokens
-10. loadEthers
-11. kill
+1. **availableSupply:** Retorna quantidade de tokens disponiveis na máquina.
+2. **buyingPrice:** Retorna preço atual de compra em wei .
+3. **sellingPrice:** Retorna preço atual de venda em wei.
+4. **buyTokens:** Recebe o amount de tokens e o value da transação,possibilitando a compra de tokens com ethers. 
+5. **sellTokens:** Recebe o amount de tokens e realiza a venda por ether.
+   
+   👑 **Funções exercida apenas pelo admin do contrato.**
+6. **changeBuyPrice:** Recebe o novo preço em wei e o substitui.
+7. **changeSellPrice:** Recebe o novo preço em wei e o substitui.
+8.  **withdrawEthers:** Saca todo o saldo de ethers do contrato e devolve para a carteira do admin.
+9.  **loadTokens:**  O admin irá carregar o amount de tokens no contrato.
+10. **loadEthers:** O admin irá carregar o valor da transação no contrato.
+11. **kill:** Mata o contrato e saca o saldo de ethers e tokens para o admin.
  ___
 
-# Testes Token
+# 👌 Testes Token
 - Initializing
 	- [x] Should return the value passed on the constructor as balance.
 	- [x] The initial status should be active
@@ -136,7 +145,7 @@ ___
 	- [x] Contract should be dead after kill
 
 ___
-# Testes Vending Machine
+# 👌 Testes Vending Machine
   - Initializing
   	- [x] should return the values passed on the constructor
   - BuyTokens
@@ -177,7 +186,7 @@ ___
   	- [x] should transfer ether and tokens to admin and kill the contract
 
 
-# Endereço para acessa os contratos:
+# 📑 Endereço para acessa os contratos:
 
 ### O deploy dos contratos foram na Rede de Teste Ropsten da Ethereum
 
@@ -186,3 +195,6 @@ Token:
 
 VendingMachine:
 [0xae066340d8628423B21390a310E92176ce27805F](https://ropsten.etherscan.io/address/0xae066340d8628423B21390a310E92176ce27805F)
+
+#  📽️ Apresentação
+Link para a [Apresentação](https://docs.google.com/presentation/d/11QQca9wtbKaJ8p2oCyScnEl4yXuibiszd4wjzGiQfBA/edit?usp=sharing)
