@@ -23,7 +23,7 @@ Em ambos foi utilizado `Solidity` e disponibilizados na rede de `Rede de Teste 
 
 
 
-# ⚙️ Tecnologia utilizadas
+# ⚙️ Tecnologias utilizadas
 
 [![solidity](imgs/solidity.png)](https://docs.soliditylang.org/en/v0.8.15/)
 [![hardhat](imgs/hardhat.png)](https://hardhat.org/)
