@@ -1,52 +1,188 @@
-# 🏦 Gama Token 📚 Web 3.0
+# Introdução
 
-<p align="center">
-  <img src="https://media.tenor.com/images/63dc70b43a949617fdfa3447868d534d/tenor.gif" alt="Hulk Smart"/>
-</p>
+Esse projeto foi desenvolvido como parte do programa de formação CriptoDev da Gama Academy em parceria com a Blockchain Academy (uma empresa 2TM).
 
-Em nossa carreira é cada vez mais necessário que tenhamos meios de expandir nosso conhecimento, pois como diz o ditado "não tá facil pra ninguém", não é mesmo ? Sendo assim, queremos criar uma maneira para que pessoas de investir na educação e na comunidade, assim todos poderão aprender e ajudar a crescer.
+Ele formado por dois `Smart Contracts`, um para criação de um Token baseado no modelo de contrato ERC-20 e um outro contrato de uma Vending Machine, para que os usuário possam comprar e vender tokens. 
 
+Em ambos foi utilizado `Solidity` e disponibilizados na rede de `Rede de Teste Ropsten da Ethereum`.
 
-## Acelerando carreiras na Web 3.0 !
+# Integrantes do time
 
-Ainda estamos em desenvolvimento e você juntamente com seu time deverão ser capazes de construir nosso MVP (Minimo Produto Viavel) de uma aplicação de _Vending Machine_ e garantir que possamos disponibilizar para o time de DApps a implementação do nosso Contrato Inteligente, que para nós, será um divisor de aguas na sua carreira (sacoou?)
+[Anderson Carneiro Sousa](https://github.com/a-cs)
 
-## Objetivo
-Construir um `Smart Contract` , utilizando `Solidity` e todas as bibliotecas e tecnologias que aprendemos durante o curso (você é livre para substitui-lás, mas fica por sua conta e risco, ok ?) e disponibiliza-las na rede `Ethereum`.
+[Bruno Wilson](https://github.com/BruceJava1001)
 
-
-## Artefatos e entregaveis
-* Código Fonte (Solidity)
-* Fork deste repositório contendo:
-    * Instruções de Instalação e operação
-    * Detalhamento das funcionalidades
-    * Endereço dos contratos e a rede em que ela foi publicada.
-    * Membros envolvidos no projeto com seus perfis do github associados
+[Felipe Geazi](https://github.com/FelipeGeazi)
 
 
-## Orientações
-Tenha sempre testes unitários no seu projeto.
+# Apresentação
+Link para a [Apresentação](https://docs.google.com/presentation/d/11QQca9wtbKaJ8p2oCyScnEl4yXuibiszd4wjzGiQfBA/edit?usp=sharing)
 
 
-## Critérios de aceite 
-1. Criou o próprio Contrato Inteligente de Token.
-2. Criou o próprio Contrato Ingeligente de Maquina de Venda do Token.
-3. O Comprador deve ser possivel comprar tokens com _ethers_.
-4. O Vendedor deve ser possivel vender tokens por _ethers_.
-5. O administrador deve ser capaz de reabastecer a maquina com _tokens_ e _ethers_.
-6. O adminsitrador deve ser capaz de sacar o saldo em _ethers_
-7. O administrador deve ser capaz de redefinir o valor dos _tokens_ para compra.
-8. O administrador deve ser capaz de redefinir o valor dos _tokens_ para venda.
-9. Não deve ser possivel comprar _tokens_ com valor zero.
-10. Não deve ser possivel vender _tokens_ com valor zero.
-11. Não deve ser possivel reabastecer a maquina com _tokens_ com valor zero.
-12. Não deve ser possivel reabastecer a maquina com _ethers_ com valor zero.
+# Tecnologia utilizadas
+
+[![solidity](imgs/solidity.png)](https://docs.soliditylang.org/en/v0.8.15/)
+[![hardhat](imgs/hardhat.png)](https://hardhat.org/)
+[![chai](imgs/chai.png)](https://www.chaijs.com/)
+[![github](imgs/github.png)](https://github.com/)
+[![vscode](imgs/vscode.png)](https://code.visualstudio.com/)
+[![web3.js](imgs/web3.png)](https://web3js.readthedocs.io/en/v1.7.3/)
+[![waffle](imgs/waffle.png)](https://getwaffle.io/)
+[![remix ide](imgs/remix.png)](https://remix-project.org/)
+
+# Instalação e operação
+
+Clone o repositório do projeto:
+
+```bash
+git clone https://github.com/a-cs/gamacoin-cryptodev.git
+```
+
+Entre na pasta do repositório criado:
+
+```bash
+cd gamacoin-cryptodev
+```
+
+Para seguir os passos seguintes é necessário instalar o [Node Js](https://nodejs.org/en/) 
+
+Instale as dependências:
+
+```bash
+npm install
+```
+
+Compile o código:
+
+```bash
+npx hardhat compile
+```
+
+Para rodar os testes:
+
+```bash
+npx hardhat test
+```
+
+# Funções implementadas:
+
+## Token
+
+1. balanceOf
+2. totalSupply
+3. transfer
+4. transferFrom
+5. mint
+6. burn
+7. pausable
+8. activate
+9. kill
+___
+## Vending Machine
+
+1. availableSupply
+2. withdrawEthers
+3. buyingPrice
+4. changeSellPrice
+5. sellingPrice
+6. changeBuyPrice
+7. buyTokens
+8. loadTokens
+9. sellTokens
+10. loadEthers
+11. kill
+ ___
+
+# Testes Token
+- Initializing
+	- [x] Should return the value passed on the constructor as balance.
+	- [x] The initial status should be active
+	- [x] The entity that created the contract must be the owner
+- Transfer
+	- [x] Should only transfer if the status is active
+	- [x] Should not be able to send to a non-existent wallet
+	- [x] Should not be transferred if the amount is 0
+	- [x] Should not be transferred if there is no balance in the wallet
+	- [x] Should transfer if there is a balance in the wallet
+- TransferFrom
+	- [x] Should only transfer if the wallet is allowed
+	- [x] Should only transfer if the status is active
+	- [x] Should not be able to send to a non-existent wallet
+	- [x] Should not be transferred if the amount is 0
+	- [x] Should not be transferred if there is no balance in the wallet
+	- [x] Should transfer if there is a balance in the wallet
+- Mint
+	- [x] Should only minted if the status is active
+	- [x] The minted value must be greater than 0
+	- [x] Only the owner can mint tokens
+	- [x] Should not be able to send to a non-existent wallet
+	- [x] Should increase totalSupply and wallets balance after mint
+- Burn
+	- [x] Should only burn if the status is active
+	- [x] the wallet must have funds to burn
+	- [x] Only the owner can burn tokens
+	- [x] Should not be able to send to a non-existent wallet
+	- [x] Should decrease totalSupply and wallets balance after burn
+- Pausable
+	- [x] Should not pause the contract if it is already paused
+	- [x] Should not be able to pause the contract if it is not the owner
+	- [x] The owner should be able to pause the contract
+- Activate
+	- [x] Should not pause the contract if it is already actived
+	- [x] Should not be able to activate the contract if it is not the owner
+	- [x] The owner should be able to activate the contract
+- Kill
+	- [x] Should not be able to kill if the contract is Active
+	- [x] Contract should be dead after kill
+
+___
+# Testes Vending Machine
+  - Initializing
+  	- [x] should return the values passed on the constructor
+  - BuyTokens
+  	- [x] should revert if the amount is zero
+  	- [x] should revert if the transaction value is lower than the expected
+  	- [x] should revert if the availabeSupply is less than the amount
+  	- [x] should be able to buy tokens
+  - SellTokens
+  	- [x] should revert if the amount is zero
+  	- [x] should revert if the transaction value is lower than the expected
+  	- [x] should be able to sell tokens
+  - WithdrawEthers
+  	- [x] should revert if not admin
+  	- [x] should revert if the machine current balance is 0
+  	- [x] should withdraw ethers
+  - ChangeSellPrice
+  	- [x] should revert if not admin
+  	- [x] should revert if the amount is zero
+  	- [x] should revert if the amount is equal current price
+  	- [x] should revert if the amount is greater than the buying price
+  	- [x] should change price
+  - ChangeBuyPrice
+  	- [x] should revert if not admin
+  	- [x] should revert if the amount is zero
+  	- [x] should revert if the amount is equal current price
+  	- [x] should revert if the amount is less than the selling price
+  	- [x] should change price
+  - LoadTokens
+  	- [x] should revert if not admin
+  	- [x] should revert if the amount is zero
+  	- [x] should load tokens
+  - LoadEthers
+  	- [x] should revert if not admin
+  	- [x] should revert if the value is zero
+  	- [x] should load Ethers
+  - Kill
+  	- [x] should revert if not admin
+  	- [x] should transfer ether and tokens to admin and kill the contract
 
 
+# Endereço para acessa os contratos:
 
+### O deploy dos contratos foram na Rede de Teste Ropsten da Ethereum
 
+Token:
+[0xe1E14C72Df3DcFDDB178cDd739b4b3F061AcDb30](https://ropsten.etherscan.io/address/0xe1E14C72Df3DcFDDB178cDd739b4b3F061AcDb30)
 
-
-
-
-
+VendingMachine:
+[0xae066340d8628423B21390a310E92176ce27805F](https://ropsten.etherscan.io/address/0xae066340d8628423B21390a310E92176ce27805F)
