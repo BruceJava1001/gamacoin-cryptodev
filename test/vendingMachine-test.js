@@ -24,8 +24,8 @@ describe('Initializing', () => {
 		vendingMachine.deployed();
 	})
 	it('should return the values passed on the constructor', async () => {
-		expect(await vendingMachine.buyingPrice()).to.be.equal(web3.utils.toWei('2', 'ether'));
-		expect(await vendingMachine.sellingPrice()).to.be.equal(web3.utils.toWei('1', 'ether'));
+		expect(await vendingMachine.buyingPrice()).to.be.equal(web3.utils.toWei('2', 'wei'));
+		expect(await vendingMachine.sellingPrice()).to.be.equal(web3.utils.toWei('1', 'wei'));
 		expect(await vendingMachine.availableSupply()).to.be.equal(0);
 	})
 })
@@ -55,18 +55,18 @@ describe('BuyTokens', () => {
 		await expect(vendingMachine.buyTokens(0)).to.be.revertedWith('Amount has to be greater than 0');
 	})
 	it('should revert if the transaction value is lower than the expected', async () => {
-		await expect(vendingMachine.buyTokens(1, { value: web3.utils.toWei('1', 'ether') })).to.be.revertedWith('The trasaction value was lower than expected');
+		await expect(vendingMachine.buyTokens(1, { value: web3.utils.toWei('1', 'wei') })).to.be.revertedWith('The trasaction value was lower than expected');
 	})
 	it('should revert if the availabeSupply is less than the amount', async () => {
-		await expect(vendingMachine.buyTokens(1, { value: web3.utils.toWei('2', 'ether') })).to.be.revertedWith('Not enough tokens in stock');
+		await expect(vendingMachine.buyTokens(1, { value: web3.utils.toWei('2', 'wei') })).to.be.revertedWith('Not enough tokens in stock');
 	})
 	it('should be able to buy tokens', async () => {
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(1000);
 		await vendingMachine.loadTokens(100)
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(900);
 
-		const valueToTransfer = BigNumber.from(web3.utils.toWei('2', 'ether'));
-		const valueToTransfer2 = BigNumber.from((web3.utils.toWei('-2', 'ether')));
+		const valueToTransfer = BigNumber.from(web3.utils.toWei('2', 'wei'));
+		const valueToTransfer2 = BigNumber.from((web3.utils.toWei('-2', 'wei')));
 		await expect(await vendingMachine.connect(wallets[0]).buyTokens(1, { value: valueToTransfer })).to.changeEtherBalances([vendingMachine, wallets[0]], [valueToTransfer, valueToTransfer2])
 		expect(await gamaToken.balanceOf(wallets[0].address)).to.be.equal(1);
 		expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(99);
@@ -108,12 +108,12 @@ describe('SellTokens', () => {
 		await vendingMachine.loadTokens(100)
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(900);
 		expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(100);
-		let valueToTransfer = web3.utils.toWei('2', 'ether');
+		let valueToTransfer = web3.utils.toWei('2', 'wei');
 		await vendingMachine.connect(wallets[1]).buyTokens(1, { value: valueToTransfer })
 		expect(await gamaToken.balanceOf(wallets[1].address)).to.be.equal(1);
 
-		valueToTransfer = web3.utils.toWei('-1', 'ether');
-		const valueToTransfer2 = web3.utils.toWei('1', 'ether');
+		valueToTransfer = web3.utils.toWei('-1', 'wei');
+		const valueToTransfer2 = web3.utils.toWei('1', 'wei');
 		await expect(await vendingMachine.connect(wallets[1]).sellTokens(1)).to.changeEtherBalances([vendingMachine, wallets[1]], [valueToTransfer, valueToTransfer2])
 		expect(await gamaToken.balanceOf(wallets[1].address)).to.be.equal(0);
 		expect(await gamaToken.balanceOf(vendingMachine.address)).to.be.equal(100);
@@ -157,11 +157,11 @@ describe('withdrawEthers', () => {
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(1000);
 		await vendingMachine.loadTokens(100)
 		expect(await gamaToken.balanceOf(admin.address)).to.be.equal(900);
-		const valueToTransfer = web3.utils.toWei('2', 'ether');
+		const valueToTransfer = web3.utils.toWei('2', 'wei');
 		await vendingMachine.connect(wallets[2]).buyTokens(1, { value: valueToTransfer })
 		expect(await gamaToken.balanceOf(wallets[2].address)).to.be.equal(1);
 		
-		const valueToTransfer2 = web3.utils.toWei('-2', 'ether');
+		const valueToTransfer2 = web3.utils.toWei('-2', 'wei');
 		await expect(await vendingMachine.withdrawEthers()).to.changeEtherBalances([admin, vendingMachine], [valueToTransfer, valueToTransfer2])
 		expect(await provider.getBalance(vendingMachine.address)).to.be.equal(0)
 	})
@@ -201,17 +201,17 @@ describe('changeSellPrice', () => {
 	})
 
 	it('should revert if the amount is equal current price', async () => {
-		await expect(vendingMachine.changeSellPrice(web3.utils.toWei('1', 'ether'))).to.be.revertedWith('The price has to be different');
+		await expect(vendingMachine.changeSellPrice(web3.utils.toWei('1', 'wei'))).to.be.revertedWith('The price has to be different');
 	})
 
 	it('should revert if the amount is greater than the buying price', async () => {
-		await expect(vendingMachine.changeSellPrice(web3.utils.toWei('3', 'ether'))).to.be.revertedWith('The selling price can not be greater than the buying price');
+		await expect(vendingMachine.changeSellPrice(web3.utils.toWei('3', 'wei'))).to.be.revertedWith('The selling price can not be greater than the buying price');
 	})
 
 	it('should change price', async () => {
-		expect(await vendingMachine.sellingPrice()).to.be.equal(web3.utils.toWei('1', 'ether'));
-		await vendingMachine.changeSellPrice(web3.utils.toWei('2', 'ether'));
-		expect(await vendingMachine.sellingPrice()).to.be.equal(web3.utils.toWei('2', 'ether'));
+		expect(await vendingMachine.sellingPrice()).to.be.equal(web3.utils.toWei('1', 'wei'));
+		await vendingMachine.changeSellPrice(web3.utils.toWei('2', 'wei'));
+		expect(await vendingMachine.sellingPrice()).to.be.equal(web3.utils.toWei('2', 'wei'));
 	})
 
 })
@@ -248,17 +248,18 @@ describe('changeBuyPrice', () => {
 	})
 
 	it('should revert if the amount is equal current price', async () => {
-		await expect(vendingMachine.changeBuyPrice(web3.utils.toWei('2', 'ether'))).to.be.revertedWith('The price has to be different');
+		await expect(vendingMachine.changeBuyPrice(web3.utils.toWei('2', 'wei'))).to.be.revertedWith('The price has to be different');
 	})
 
 	it('should revert if the amount is less than the selling price', async () => {
-		await expect(vendingMachine.changeBuyPrice(web3.utils.toWei('0.5', 'ether'))).to.be.revertedWith('The buying price can not be less than the selling price');
+		await vendingMachine.changeSellPrice(web3.utils.toWei('2', 'wei'));
+		await expect(vendingMachine.changeBuyPrice(web3.utils.toWei('1', 'wei'))).to.be.revertedWith('The buying price can not be less than the selling price');
 	})
 
 	it('should change price', async () => {
-		expect(await vendingMachine.buyingPrice()).to.be.equal(web3.utils.toWei('2', 'ether'));
-		await vendingMachine.changeBuyPrice(web3.utils.toWei('3', 'ether'));
-		expect(await vendingMachine.buyingPrice()).to.be.equal(web3.utils.toWei('3', 'ether'));
+		expect(await vendingMachine.buyingPrice()).to.be.equal(web3.utils.toWei('2', 'wei'));
+		await vendingMachine.changeBuyPrice(web3.utils.toWei('3', 'wei'));
+		expect(await vendingMachine.buyingPrice()).to.be.equal(web3.utils.toWei('3', 'wei'));
 	})
 
 })

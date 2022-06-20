@@ -21,8 +21,8 @@ contract VendingMachine {
     constructor(address token) {
         admin = msg.sender;
         tokenAddress = token;
-        buyingprice = 2 ether;
-        sellingprice = 1 ether;
+        buyingprice = 2 wei;
+        sellingprice = 1 wei;
     }
 
     function availableSupply() public view returns (uint256) {
